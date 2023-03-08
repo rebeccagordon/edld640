@@ -192,7 +192,7 @@ Rebecca Gordon &lt;rebeccag@uoregon.edu&gt;.</p>
   <strong>Hypothesis 1: </strong>
   <p>Children exposed to poverty in wave 1 will be more likely to exhibit lower internalizing and externalizing behavior scores at wave 2.</p>
   <strong>Hypothesis 2: </strong>
-  <p>Children exposed to poverty in wave 1 will be more likely to exhibit chronic health conditions at wave 3.</p>
+  <p>Children with lower externalizing and internalizing scores at wave 2 will be more likely to exhibit chronic health conditions at wave 3.</p>
 <h2 id="methods">Methods</h2>
 <p>Data were obtained from three waves of the second cohort of the National Survey of Child and Adolescent Well-Being (NSCAW II). NSCAW II used a two-stage stratified sampling design, which first selected nine sampling strata consisting of the eight states with the largest child welfare caseloads and the remainder of the United States. NSCAW II study sampled cases from Child Protective Services investigations of families that were closed between February 2008 and April 2009 nationwide. Data collection includes three waves: 4 months, 18 months and 36 months after the close of an investigation. The final sample of children was representative of the national population of children birth to 17 years of age in families being investigated for allegations of maltreatment. Our analysis followed youth birth to 14 years of age at baseline to account for children ageing out. Response rates for waves 2 and 3 ranged from 84 % to 94 %.</p>
 <h3 id="measures">Measures</h3>
@@ -202,16 +202,17 @@ Rebecca Gordon &lt;rebeccag@uoregon.edu&gt;.</p>
      <p> Children's internalizing and externalizing behaviors were recorded as continuous dependent variables at wave 2. A checklist of symptoms of anxiety and depression, such as excessive crying, over-dependence, and nervous gestures action and unnecessary panic. Questions for assessing behavior externalizing a checklist for assessing child behavior symptoms of behavioral or anger problems, including rebellion, destruction of property, harm to self or others. Responses use a 3-point Likert-type scale ranging from not
 true (0), somewhat or sometimes true (1), and very or often true (2). The continuous T-scores (range 0–100) were utilized, with higher scores indicating a stronger likelihood of having an internalizing or externalizing disorder. In this sample, internal consistency of the Internalizing subscale of the Child Behavior Checklist was good, averaging .87 for children 18 months to 5 years old and .90 for children 6 years and older.</p>
    <h4 id="outcomes">Chronic Health Outcomes</h4>
-  <p>To determine chronic medical conditions, we used a measure developed by Stein et al. (2013) using NSCAW II data. The measure included diagnoses that are usually considered chronic, as well as others where chronicity is possible, but uncertain: asthma, attention-deficit/hyperactivity disorder, asthma, autism, depression and anxiety, and weight problems. Children were considered to have a chronic medical condition if they reported a diagnosis.</p>
+  <p>We assessed if the child reported chronic medical conditions at wave 3: asthma, attention-deficit/hyperactivity disorder, asthma, autism, depression and anxiety, and weight problems. Children were considered to have a chronic medical condition if they reported a diagnosis.</p>
  <h4 id="covariates">Covariates</h4>
   <p>Covariates used in the analysis were child gender and child ethnicity. Child gender is a dichotomous (male or
 female). Child ethnicity included: Native Indian/Alaskan, Black, and White.</p>
 <h3 id="analyses">Data Analyses</h3>
   <p>Analyses for the current study were run in R (R version 4.2.1). Multiple
 imputation (MI) was employed in the current study to address missing data. Twenty fully imputed databases were created using  the <code>mice</code> (multiple imputation by chained equations) package. Analyses were performed separately in each imputed dataset, and the final point estimates reported are a pooled average of the results. </p>
-  <p>We ran 5 multivariate regression models to examine the association between early poverty and each child health outcome (ADHD, ASD, asthma, weight, and anxiety/depression symptoms. The independent variables for each model were externalizing and internalizing scores, and covariates(child biological sex and child ethnicity). </p>
+  <p>We ran 5 multivariate regression models to examine the association between internalzing and externalzing scores and each child health outcome (ADHD, ASD, asthma, weight, and anxiety/depression symptoms). The independent variables for each model were externalizing and internalizing scores, and covariates(child biological sex and child ethnicity). </p>
 <h2 id="results">Results</h2>
-<p>Results for this paper...</p>
+  <p><b>Hypothesis 1. </b>We found that poverty was significantly associated with negative internalizing (b = -1.12, SE=.4, p=0.01) but positive externalizing (b=2.6, SE=.6, p=0.01) scores at wave 2 (see table 2).</p>
+  <p><b>Hypothesis 2. </b>We found that internalizing and externalizing scores were significantly associated with chronic health conditions at wave 3 (see table 2). Lower externalzing scores predicted ADHD (b=-.02, SE = 0, p=.04) and lower internalizing scores predicted Anxiety/depression (b=-.01, SE = 0, p=.04). </p>
 <h2 id="discussion">Discussion</h2>
 <p> Discussion for this paper...</p>
 <h2 id="figures">Figures</h2>
@@ -231,7 +232,7 @@ Test Scores by Poverty Status</figcaption>
 </div>
   <div id="fig:vector-image" class="fignos">
 <figure>
-<img src="https://user-images.githubusercontent.com/26876607/222285136-82698e70-5824-4dfe-8ef6-855f9d6dcf0c.jpg"style="width:100%" class="white" style="height:2.5in" alt="Figure 2: Test Scores by Poverty Status" />
+<img src="https://user-images.githubusercontent.com/26876607/222285136-82698e70-5824-4dfe-8ef6-855f9d6dcf0c.jpg"style="width:100%" class="white" style="height:2.5in" alt="Figure 3: Correlation Matrix" />
  <figcaption aria-hidden="true"><span>Figure 3:</span> <strong></strong>
 Correlation Matrix</figcaption>
 </figure>
@@ -284,10 +285,18 @@ Correlation Matrix</figcaption>
 </tbody>
 </table>
 </div>
-  <div id="fig:square-image" class="fignos">
+ <div id="fig:square-image" class="fignos">
 <figure>
 <strong>Table 2: </strong>
-Model Outputs</figcaption>
+Model Outputs - Hypothesis 1</figcaption>
+<img src=https://user-images.githubusercontent.com/26876607/223837075-ef500b0f-39df-415b-923b-cd269fb247b6.png style="width:100%"alt="" />
+<figcaption aria-hidden="true"><span></span>
+</figure>
+</div>
+  <div id="fig:square-image" class="fignos">
+<figure>
+<strong>Table 3: </strong>
+Model Outputs - Hypothesis 2</figcaption>
 <img src=https://user-images.githubusercontent.com/26876607/223804043-e8412435-4ff2-4ba5-8f9b-9344be397c7c.png style="width:100%"alt="" />
 <img src=https://user-images.githubusercontent.com/26876607/223804065-9b67e723-6f24-4797-9aec-78cf6e6db6dc.png style="width:100%"alt="" />
 <figcaption aria-hidden="true"><span></span>
@@ -324,12 +333,7 @@ Model Outputs</figcaption>
 <div id="ref-dowd" class="csl-entry" role="doc-biblioentry">
 <div class="csl-left-margin">4. </div><div class="csl-right-inline">Dowd, K.; Dolan, M.; Wallin, J., et al. (2011). National Survey of Child and Adolescent Well-Being II: Combined Waves 1–2 Data File User's Manual Restricted Release Version. <i>Ithaca, NY: Cornell University,<div class="csl-block"></div>National Data Archive on Child Abuse and Neglect;</i> 
 </div>
-
-div id="ref-kerker" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">5. </div><div class="csl-right-inline"> Kerker, B. D., Zhang, J., Nadeem, E., Stein, R. E., Hurlburt, M. S., Heneghan, A., ... & Horwitz, S. M. (2015). Adverse childhood experiences and mental health, chronic medical conditions, and development in young children. <div class="csl-block"> <i>Academic pediatrics, 15(5), </i> 510-517.
-</div>
-
-
+  
 <div id="ref-shrider" class="csl-entry" role="doc-biblioentry">
 <div class="csl-left-margin">6. </div><div class="csl-right-inline"> Shrider, E. A., Kollar, M., Chen, F., & Semega, J. (2021). Income and poverty in the United States: 2020. <div class="csl-block"> <i>US Census Bureau, Current Population Reports, </i> (P60-273).
 </div>
@@ -342,6 +346,13 @@ div id="ref-kerker" class="csl-entry" role="doc-biblioentry">
 <div class="csl-left-margin">8. </div><div class="csl-right-inline"> Stambaugh, L. F., Ringeisen, H., Casanueva, C. C., Tueller, S., Smith, K. E., & Dolan, M. (2013). Adverse childhood experiences in NSCAW. Washington, DC: Office of Planning, Research and Evaluation, Administration for Children and Families <div class="csl-block"> <i>Research and Evaluation, Administration for Children and Families, US Department of Health and Human Services, Report, </i> 26.
 </div>
 </div>
+
+<div id="ref-kerker" class="csl-entry" role="doc-biblioentry">
+<div class="csl-left-margin">5. </div><div class="csl-right-inline"> Kerker, B. D., Zhang, J., Nadeem, E., Stein, R. E., Hurlburt, M. S., Heneghan, A., ... & Horwitz, S. M. (2015). Adverse childhood experiences and mental health, chronic medical conditions, and development in young children. <div class="csl-block"> <i>Academic pediatrics, 15(5), </i> 510-517.
+</div>
+
+
+
 
 
 
