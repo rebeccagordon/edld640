@@ -214,7 +214,7 @@ female). Child ethnicity included: Native Indian/Alaskan, Black, and White.</p>
 imputation (MI) was employed in the current study to address missing data. Twenty fully imputed databases were created using  the <code>mice</code> (multiple imputation by chained equations) package. Analyses were performed separately in each imputed dataset, and the final point estimates reported are a pooled average of the results. </p>
   <p>To assess hypothesis 1, we ran 2 multiple regression models to examine the relationship between early poverty exposure in childhood and internalizing and externaling scores and wave 2.</p>
   <p> To assess the hypothesis 2, we ran 5 logistic regression models to examine the association between internalzing and externalzing scores and each child health outcome (ADHD, ASD, asthma, weight, and anxiety/depression symptoms). The independent variables for each model were externalizing and internalizing scores, and covariates(child biological sex and child ethnicity). </p>
-<p>Finally, we examined and compared model performance using a bagged trees approach with cross validation. This approach randomly selects from the pooled imputed datasets and makes aggregate predictions for multiple different trees. The cutoff probability for predictions is: probability > 0.5. The model performance was then assessed based on measures of: true negative rate, true positive rate, accuracy, and precision. Model performance comparisons are outlined in (table <a href="#tbl:Bagged">4</a>).</p>
+<p>Finally, we examined and compared model performances using a ridge penalty regularization and bagged trees approach with cross validation. The bagged trees approach randomly selects from the pooled imputed datasets and makes aggregate predictions for multiple different trees. Ridge penalty regularization adds penalty terms to the loss function to avoid large coefficients, and we reduce model variance by including a penalty term in exchange for adding bias. The cutoff probability for predictions is: probability > 0.5. The logistic model performances were then assessed based on measures of: true negative rate, true positive rate, accuracy, and precision. The multiple regression model performances were assesed based on measures of: Root of the Mean of the Square of Errors, Mean of Absolute value of Errors, and R-squared. Model performance comparisons are outlined in (table <a href="#tbl:Logistic">4</a>, <a href="#tbl:logisticridge">5</a>,<a href="#tbl:Bagged">6</a>).</p>
 <h2 id="results">Results</h2>
   <p><b>Hypothesis 1. </b>We found that poverty was significantly associated with negative internalizing (b = -1.12, SE=.4, p=0.01) but positive externalizing (b=2.6, SE=.6, p=0.01) scores at wave 2 (table <a href="#fig:hyp1">2</a>).</p>
   <p><b>Hypothesis 2. </b>We found that internalizing and externalizing scores were significantly associated with chronic health conditions at wave 3 (table <a href="#fig:hyp2">3</a>). Lower externalzing scores predicted ADHD (b=-.02, SE = 0, p=.04) and lower internalizing scores predicted Anxiety/depression (b=-.01, SE = 0, p=.04). </p>
@@ -276,7 +276,7 @@ Correlation Matrix</figcaption>
 <td style="text-align: center;">0.5</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">Externalzing score</td>
+<td style="text-align: center;">Externalizing score</td>
 <td style="text-align: center;">503</td>
 <td style="text-align: center;">51.61</td>
 <td style="text-align: center;">11.53</td>
@@ -310,7 +310,7 @@ Model Outputs - Hypothesis 2</figcaption>
  
 <div id="tbl:Logistic" class="tablenos">
 <table id="tbl:Logistic" style="width:100%;">
-<caption><span>Table 4:</span> Performance Evaluation: Logistic Regression
+<caption><span>Table 4:</span> Performance Evaluation: Logistic and Multiple Regression
 </caption>
 <colgroup>
 <col style="width: 19%" />
@@ -387,7 +387,7 @@ Model Outputs - Hypothesis 2</figcaption>
 
 <div id="tbl:logisticridge" class="tablenos">
 <table id="tbl:logisticridge" style="width:100%;">
-<caption><span>Table 5:</span> Performance Evaluation: Logistic Regression with Ridge Penalty
+<caption><span>Table 5:</span> Performance Evaluation: Logistic and Multiple Regression with Ridge Penalty Regularization
 </caption>
 <colgroup>
 <col style="width: 19%" />
