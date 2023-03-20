@@ -1,0 +1,546 @@
+---
+title: "cross-validation"
+author: "REFG"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(caret)
+require(recipes)
+library(rpart)
+library(rpart.plot)
+library(ipred)
+require(cutpointr)
+require(glmnet)
+require(vip)
+library(readr)
+```
+
+```{r}
+dfcps <- read_csv("dfcps.csv")
+df <- dfcps %>% select("Externalizing", "Internalizing","Poverty", "Gender", "Ethnicity", "weight", "adhd", "anxdep", "asthma", "asd")
+
+df$adhd <- as.factor(df$adhd)
+df$weight <- as.factor(df$weight)
+df$anxdep <- as.factor(df$anxdep)
+df$asthma <- as.factor(df$asthma)
+df$asd <- as.factor(df$asd)
+df$Gender <- as.numeric(df$Gender)
+df$Poverty<- as.numeric(df$Poverty)
+df$Ethnicity<- as.numeric(df$Ethnicity)
+
+str(df)
+```
+
+
+```{r}
+
+outcome <- c()
+
+loc <- sample(1:nrow(df), round(nrow(df) * 0.8))
+
+
+  # Training dataset
+
+df_train  <- df[loc, ]
+  
+  # Test dataset
+
+df_te  <- df[-loc, ]
+
+folds = cut(seq(1,nrow(df_train)),breaks=10,labels=FALSE)
+
+# Create the list for each fold 
+      
+my.indices <- vector('list',10)
+    
+    for(i in 1:10){
+        my.indices[[i]] <- which(folds!=i)
+    }
+
+cv <- trainControl(method = "cv",
+             index  = my.indices)
+
+
+grid <- expand.grid(mtry = 5,
+                    splitrule='gini',
+                    min.node.size=2)
+
+
+cvridge <- trainControl(method = "cv",
+                   index  = my.indices,
+                   summaryFunction = mnLogLoss)
+
+
+
+gridridge <- data.frame(alpha = 0, lambda = seq(.15,.25,.001)) 
+
+```
+
+```{r weight}
+
+numeric <- c('Externalizing', 'Internalizing','Poverty', 'Gender', 'Ethnicity')
+outcome <- c('weight')
+
+blueprint_df <- recipe(x = df,
+								 vars  = c(numeric, outcome),
+								 roles = c(rep('predictor',5),'outcome')) %>% 
+ step_indicate_na(all_of(numeric)) %>%
+  step_zv(all_numeric())
+
+bagged.trees.weight <- caret::train(blueprint_df,
+                             data      = df_train,
+                             method    = 'ranger',
+                             trControl = cv,
+                             tuneGrid  = grid,
+                             num.trees = 500,
+                             max.depth = 60)
+
+
+bagged.trees.weight$results
+
+predicted_weight <- predict(bagged.trees.weight, df_te)
+
+
+bags_confusion <- table(df_te$weight, predicted_weight)
+
+bags_ACC = (bags_confusion[2,2]+bags_confusion[1,1])/sum(bags_confusion)
+
+bags_ACC
+
+bags_PRE = bags_confusion[2,2]/(bags_confusion[1,2]+bags_confusion[2,2])
+
+bags_PRE
+
+bags_TPR = bags_confusion[2,2]/(bags_confusion[2,1]+bags_confusion[2,2])
+
+bags_TPR
+
+bags_TNR = bags_confusion[1,1]/(bags_confusion[1,1]+bags_confusion[1,2])
+
+bags_TNR
+
+ridge_weight <- train(blueprint_df, 
+               data      = df_train, 
+               method    = "glmnet",
+               family    = 'binomial',
+               metric    = 'logLoss',
+               trControl = cv,
+               tuneGrid = gridridge)
+
+imp_weight<-vip(ridge_weight,num_features = 10, geom = "point") + theme_bw()
+
+pred_ridge_weight <- predict(ridge_weight, df_te, type='prob')
+df_te$pred_ridge_weight <- ifelse(pred_ridge_weight>.5,1,0)
+tab <- table(df_te$pred_ridge_weight[,"1"],
+             df_te$weight,
+             dnn = c('Predicted','Observed'))
+tn <- tab[1,1]
+tp <- tab[2,2]
+fp <- tab[2,1]
+fn <- tab[1,2]
+acc <- (tp + tn)/(tp+tn+fp+fn)
+acc
+# True Negative Rate
+
+tab[1,1]/(tab[1,1]+tab[1,2])
+# True Positive Rate
+
+tab[2,2]/(tab[2,1]+tab[2,2])
+
+# Precision
+
+tab[2,2]/(tab[1,2]+tab[2,2])
+
+
+```
+```{r asd}
+
+numeric <- c('Externalizing', 'Internalizing','Poverty', 'Gender', 'Ethnicity')
+outcome <- c('asd')
+
+bagged.trees.asd <- caret::train(blueprint_df,
+                             data      = df_train,
+                             method    = 'ranger',
+                             trControl = cv,
+                             tuneGrid  = grid,
+                             num.trees = 500,
+                             max.depth = 60)
+
+bagged.trees.asd$results
+
+predicted_asd <- predict(bagged.trees.asd, df_te)
+
+head(predicted_asd)
+
+bags_confusion <- table(df_te$asd, predicted_asd)
+
+bags_ACC = (bags_confusion[2,2]+bags_confusion[1,1])/sum(bags_confusion)
+
+bags_ACC
+
+bags_PRE = bags_confusion[2,2]/(bags_confusion[1,2]+bags_confusion[2,2])
+
+bags_PRE
+
+bags_TPR = bags_confusion[2,2]/(bags_confusion[2,1]+bags_confusion[2,2])
+
+bags_TPR
+
+bags_TNR = bags_confusion[1,1]/(bags_confusion[1,1]+bags_confusion[1,2])
+
+bags_TNR
+
+ridge_asd <- train(blueprint_df, 
+               data      = df_train, 
+               method    = "glmnet",
+               family    = 'binomial',
+               metric    = 'logLoss',
+               trControl = cv,
+               tuneGrid = gridridge)
+
+imp_asd<-vip(ridge_asd,num_features = 10, geom = "point") + theme_bw()
+
+pred_ridge_asd <- predict(ridge_asd, df_te, type='prob')
+df_te$pred_ridge_asd <- ifelse(pred_ridge_asd>.5,1,0)
+tab <- table(df_te$pred_ridge_asd[,"1"],
+             df_te$asd,
+             dnn = c('Predicted','Observed'))
+tn <- tab[1,1]
+tp <- tab[2,2]
+fp <- tab[2,1]
+fn <- tab[1,2]
+acc <- (tp + tn)/(tp+tn+fp+fn)
+acc
+# True Negative Rate
+
+tab[1,1]/(tab[1,1]+tab[1,2])
+# True Positive Rate
+
+tab[2,2]/(tab[2,1]+tab[2,2])
+
+# Precision
+
+tab[2,2]/(tab[1,2]+tab[2,2])
+
+
+```
+```{r asthma}
+
+numeric <- c('Externalizing', 'Internalizing','Poverty', 'Gender', 'Ethnicity')
+outcome <- c('asthma')
+
+bagged.trees.asthma <- caret::train(blueprint_df,
+                             data      = df_train,
+                             method    = 'ranger',
+                             trControl = cv,
+                             tuneGrid  = grid,
+                             num.trees = 500,
+                             max.depth = 60)
+
+bagged.trees.asthma$results
+
+predicted_asthma <- predict(bagged.trees.asthma, df_te)
+
+head(predicted_asthma)
+
+bags_confusion <- table(df_te$asthma, predicted_asthma)
+
+bags_ACC = (bags_confusion[2,2]+bags_confusion[1,1])/sum(bags_confusion)
+
+bags_ACC
+
+bags_PRE = bags_confusion[2,2]/(bags_confusion[1,2]+bags_confusion[2,2])
+
+bags_PRE
+
+bags_TPR = bags_confusion[2,2]/(bags_confusion[2,1]+bags_confusion[2,2])
+
+bags_TPR
+
+bags_TNR = bags_confusion[1,1]/(bags_confusion[1,1]+bags_confusion[1,2])
+
+bags_TNR
+
+
+ridge_asthma <- train(blueprint_df, 
+               data      = df_train, 
+               method    = "glmnet",
+               family    = 'binomial',
+               metric    = 'logLoss',
+               trControl = cv,
+               tuneGrid = gridridge)
+
+imp_asthma<-vip(ridge_asthma,num_features = 10, geom = "point") + theme_bw()
+
+pred_ridge_asthma <- predict(ridge_asthma, df_te, type='prob')
+df_te$pred_ridge_asthma <- ifelse(pred_ridge_asthma>.5,1,0)
+tab <- table(df_te$pred_ridge_asthma[,"1"],
+             df_te$asthma,
+             dnn = c('Predicted','Observed'))
+tn <- tab[1,1]
+tp <- tab[2,2]
+fp <- tab[2,1]
+fn <- tab[1,2]
+acc <- (tp + tn)/(tp+tn+fp+fn)
+acc
+
+# True Negative Rate
+
+tab[1,1]/(tab[1,1]+tab[1,2])
+# True Positive Rate
+
+tab[2,2]/(tab[2,1]+tab[2,2])
+
+# Precision
+
+tab[2,2]/(tab[1,2]+tab[2,2])
+
+
+```
+```{r adhd}
+
+numeric <- c('Externalizing', 'Internalizing','Poverty', 'Gender', 'Ethnicity')
+outcome <- c('adhd')
+
+bagged.trees.adhd <- caret::train(blueprint_df,
+                             data      = df_train,
+                             method    = 'ranger',
+                             trControl = cv,
+                             tuneGrid  = grid,
+                             num.trees = 500,
+                             max.depth = 60)
+
+bagged.trees.adhd$results
+
+predicted_adhd <- predict(bagged.trees.adhd, df_te)
+
+head(predicted_adhd)
+
+bags_confusion <- table(df_te$adhd, predicted_adhd)
+
+bags_ACC = (bags_confusion[2,2]+bags_confusion[1,1])/sum(bags_confusion)
+
+bags_ACC
+
+bags_PRE = bags_confusion[2,2]/(bags_confusion[1,2]+bags_confusion[2,2])
+
+bags_PRE
+
+bags_TPR = bags_confusion[2,2]/(bags_confusion[2,1]+bags_confusion[2,2])
+
+bags_TPR
+
+bags_TNR = bags_confusion[1,1]/(bags_confusion[1,1]+bags_confusion[1,2])
+
+bags_TNR
+
+ridge_adhd <- train(blueprint_df, 
+               data      = df_train, 
+               method    = "glmnet",
+               family    = 'binomial',
+               metric    = 'logLoss',
+               trControl = cv,
+               tuneGrid = gridridge)
+
+imp_adhd<-vip(ridge_adhd,num_features = 10, geom = "point") + theme_bw()
+
+pred_ridge_adhd <- predict(ridge_adhd, df_te, type='prob')
+df_te$pred_ridge_adhd <- ifelse(pred_ridge_adhd>.5,1,0)
+tab <- table(df_te$pred_ridge_adhd[,"1"],
+             df_te$adhd,
+             dnn = c('Predicted','Observed'))
+tn <- tab[1,1]
+tp <- tab[2,2]
+fp <- tab[2,1]
+fn <- tab[1,2]
+acc <- (tp + tn)/(tp+tn+fp+fn)
+acc
+# True Negative Rate
+
+tab[1,1]/(tab[1,1]+tab[1,2])
+# True Positive Rate
+
+tab[2,2]/(tab[2,1]+tab[2,2])
+
+# Precision
+
+tab[2,2]/(tab[1,2]+tab[2,2])
+
+```
+```{r anxdep}
+
+numeric <- c('Externalizing', 'Internalizing','Poverty', 'Gender', 'Ethnicity')
+outcome <- c('anxdep')
+
+bagged.trees.anxdep <- caret::train(blueprint_df,
+                             data      = df_train,
+                             method    = 'ranger',
+                             trControl = cv,
+                             tuneGrid  = grid,
+                             num.trees = 500,
+                             max.depth = 60)
+
+bagged.trees.anxdep$results
+
+predicted_anxdep <- predict(bagged.trees.anxdep, df_te)
+
+head(predicted_anxdep)
+
+bags_confusion <- table(df_te$anxdep, predicted_anxdep)
+
+bags_ACC = (bags_confusion[2,2]+bags_confusion[1,1])/sum(bags_confusion)
+
+bags_ACC
+
+bags_PRE = bags_confusion[2,2]/(bags_confusion[1,2]+bags_confusion[2,2])
+
+bags_PRE
+
+bags_TPR = bags_confusion[2,2]/(bags_confusion[2,1]+bags_confusion[2,2])
+
+bags_TPR
+
+bags_TNR = bags_confusion[1,1]/(bags_confusion[1,1]+bags_confusion[1,2])
+
+bags_TNR
+
+ridge_anxdep <- train(blueprint_df, 
+               data      = df_train, 
+               method    = "glmnet",
+               family    = 'binomial',
+               metric    = 'logLoss',
+               trControl = cv,
+               tuneGrid = gridridge)
+
+imp_adhd<-vip(ridge_anxdep,num_features = 10, geom = "point") + theme_bw()
+
+pred_ridge_anxdep <- predict(ridge_anxdep, df_te, type='prob')
+df_te$pred_ridge_anxdep <- ifelse(pred_ridge_anxdep>.5,1,0)
+tab <- table(df_te$pred_ridge_anxdep[,"1"],
+             df_te$anxdep,
+             dnn = c('Predicted','Observed'))
+tn <- tab[1,1]
+tp <- tab[2,2]
+fp <- tab[2,1]
+fn <- tab[1,2]
+acc <- (tp + tn)/(tp+tn+fp+fn)
+acc
+
+# True Negative Rate
+
+tab[1,1]/(tab[1,1]+tab[1,2])
+# True Positive Rate
+
+tab[2,2]/(tab[2,1]+tab[2,2])
+
+# Precision
+
+tab[2,2]/(tab[1,2]+tab[2,2])
+```
+```{r ext}
+
+grid2 <- expand.grid(mtry = 2,
+                    splitrule='variance',
+                    min.node.size=2)
+
+numeric <- c('Internalizing','Poverty', 'Gender', 'Ethnicity')
+outcome <- c('Externalizing')
+
+blueprint_df2 <- recipe(x = df,
+								 vars  = c(numeric, outcome),
+								 roles = c(rep('predictor',4),'outcome')) %>% 
+ step_indicate_na(all_of(numeric)) %>%
+  step_zv(all_numeric())
+
+
+bagged.trees.ext <- caret::train(blueprint_df2,
+                             data      = df_train,
+                             method    = 'ranger',
+                             trControl = cv,
+                             tuneGrid  = grid2,
+                             num.trees = 500,
+                             max.depth = 60)
+
+predicted_bags_ext <- predict(bagged.trees.ext, df_te)
+
+bagged_rmse = sqrt(mean((df_te$Externalizing - predicted_bags_ext)^2))
+bagged_rmse
+bagged_mae = mean(abs(df_te$Externalizing - predicted_bags_ext))
+bagged_mae
+bagged_rsq = cor(df_te$Externalizing,predicted_bags_ext)^2
+bagged_rsq
+
+ridge_ext <- caret::train(blueprint_df2, 
+                        data      = df_train, 
+                        method    = "glmnet", 
+                        trControl = cv,
+                        tuneGrid  = gridridge)
+
+
+imp_ext<-vip(ridge_ext,num_features = 10, geom = "point") + theme_bw()
+
+predicted_ridge_ext <- predict(ridge_ext, df_te)
+
+rmse = sqrt(mean((df_te$Externalizing - predicted_ridge_ext)^2))
+rmse
+mae = mean(abs(df_te$Externalizing - predicted_ridge_ext))
+mae
+rsq = cor(df_te$Externalizing,predicted_ridge_ext)^2
+rsq
+
+```
+```{r int}
+numeric <- c('Externalizing','Poverty', 'Gender', 'Ethnicity')
+outcome <- c('Internalizing')
+
+blueprint_df2 <- recipe(x = df,
+								 vars  = c(numeric, outcome),
+								 roles = c(rep('predictor',4),'outcome')) %>% 
+ step_indicate_na(all_of(numeric)) %>%
+  step_zv(all_numeric())
+
+
+bagged.trees.int <- caret::train(blueprint_df2,
+                             data      = df_train,
+                             method    = 'ranger',
+                             trControl = cv,
+                             tuneGrid  = grid2,
+                             num.trees = 500,
+                             max.depth = 60)
+
+predicted_bags_int <- predict(bagged.trees.int, df_te)
+
+bagged_rmse = sqrt(mean((df_te$Internalizing - predicted_bags_int)^2))
+bagged_rmse
+bagged_mae = mean(abs(df_te$Internalizing - predicted_bags_int))
+bagged_mae
+bagged_rsq = cor(df_te$Internalizing,predicted_bags_int)^2
+bagged_rsq
+
+ridge_int <- caret::train(blueprint_df2, 
+                        data      = df_train, 
+                        method    = "glmnet", 
+                        trControl = cv,
+                        tuneGrid  = gridridge)
+
+imp_int<-vip(ridge_int,num_features = 10, geom = "point") + theme_bw()
+
+predicted_ridge_int <- predict(ridge_int, df_te)
+
+rmse = sqrt(mean((df_te$Internalizing - predicted_ridge_int)^2))
+rmse
+mae = mean(abs(df_te$Internalizing - predicted_ridge_int))
+mae
+rsq = cor(df_te$Internalizing,predicted_ridge_int)^2
+rsq
+```
+```{r}
+imp_asthma
+imp_adhd
+imp_asd
+
+```
+

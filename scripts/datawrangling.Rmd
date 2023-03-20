@@ -1,0 +1,45 @@
+---
+title: "edld641"
+author: "REFG"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(haven)
+library(psych)
+```
+```{r}
+#Large data files
+cps_n2_t1 <- read_sav("cps_n2_t1.sav")
+cps_n2_w2_t1 <- read_sav("cps_n2_w2_t1.sav")
+cps_n2_w3_t1 <- read_sav("cps_n2_w3_t1.sav")
+
+cps_n2_t1 <- cps_n2_t1 %>% filter(CHDTOTSET == 1 | CHDTOTSET ==2| CHDTOTSET ==5)
+cps_n2_w2_t1 <- cps_n2_w2_t1 %>% filter(NI2_RISK == 1 & CH2TOTSET == 1 | CH2TOTSET ==2| CH2SETTING ==5)
+cps_n2_w3_t1 <- cps_n2_w3_t1 %>% filter(NI3_RISK == 1 & CH3TOTSET == 1 | CH3TOTSET ==2| CH3TOTSET ==5)
+
+cps_n2_w2_t1$ch2AgeY
+
+cpsw1 <- cps_n2_t1 %>% select(NSCAWID, 
+chdGendr, chdAgeY,CGDPOVRT, chRrace)
+cpsw2 <- cps_n2_w2_t1 %>% select(NSCAWID, ch2AgeY, TC2_EPT, TC2_IPT)
+cpsw3 <- cps_n2_w3_t1 %>%  select(NSCAWID, ch3AgeY, HS33a1a, HS33a2a, HS33a3a, HS33a4a, HS33a5a, HS33a6a, HS33a7a, HS33a8a, HS33a9a, HS33a10a, HS33a11a,HS33a12a, HS33a13a, HS33a14a, HS33a25a, HS33a31a, HS31h42)
+
+
+cpswmiss<-cpsw1 %>%
+    left_join(cpsw2, by='NSCAWID') %>%
+    left_join(cpsw3, by='NSCAWID')
+
+write.csv(cpswmiss, "cpswmiss.csv")
+
+
+cpsnomiss<-cpsw1 %>%
+    inner_join(cpsw2, by='NSCAWID') %>%
+    inner_join(cpsw3, by='NSCAWID')
+
+write.csv(cpsnomiss, "cpsnomiss.csv")
+```
+

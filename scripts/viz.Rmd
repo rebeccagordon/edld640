@@ -1,0 +1,185 @@
+---
+title: "viz"
+author: "REFG"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse); theme_set(theme_minimal())
+library(haven)
+library(Hmisc)
+library(mice)
+library(sjPlot)
+library(kableExtra)
+library(janitor)
+library(ggmice)
+library(ggokabeito)
+```
+
+```{r rename-pivot}
+cps <- read_csv("cpswmiss.csv")[,-1]
+
+cps <- cps %>% filter(chdAgeY <= 5) 
+
+cps <- rename(cps, 
+							asthma=HS33a1a,
+							adhd = HS33a2a,
+							asd = HS33a3a,
+							downsyn = HS33a4a,
+							mr = HS33a5a,
+							anxdep = HS33a6a,
+							diabetes = HS33a7a,
+							insulin = HS33a8a,
+							heartprob = HS33a9a,
+							bloodprob = HS33a10a,
+							cysticfib = HS33a11a,
+							cp = HS33a12a,
+							muscdyst = HS33a13a,
+							epilepsy = HS33a14a,
+							hypertension = HS33a25a,
+							healthprob = HS33a31a,
+							weight = HS31h42,
+							Poverty = CGDPOVRT,
+							Internalizing = TC2_IPT ,
+							Externalizing = TC2_EPT,
+							Ethnicity = chRrace,
+							Gender = chdGendr) 
+
+cps[cps <0] <- NA
+
+cps <- cps %>% mutate(
+	Poverty = case_when(Poverty <=2 ~ 1,
+						Poverty >=3 ~ 0)
+)
+
+
+
+cps <- cps  %>%  mutate_at(vars(10:26),
+          ~as.factor(recode(.,
+                             "1"=1,
+                             "2"=0,
+          									 "3" = 0)))
+
+
+cps$Gender <- as.factor(cps$Gender)
+cps$Poverty<- as.factor(cps$Poverty)
+cps$Ethnicity<- as.factor(cps$Ethnicity)
+
+
+describe(cps)
+tabyl(cps$Ethnicity)
+
+#write.csv(cps, file= "cps.csv")
+```
+
+
+```{r}
+povlabs <- c("Below Poverty", "Above Poverty")
+testxpov <- cps %>% pivot_longer(
+	cols = 7:8,
+	names_to = "test",
+	values_to = "score") %>% filter(!is.na(score)) %>% 
+	ggplot(aes(score, as.factor(Poverty), group=Poverty)) +
+				 	geom_jitter(aes(color=test))+
+					geom_boxplot(alpha = .8) +
+	scale_y_discrete(labels= povlabs) +
+	scale_color_okabe_ito() +
+	labs(title = "Test Scores by Poverty Status",
+			 x = "Test Score",
+			 y = "Poverty status",
+			 color = "Test",
+			 caption = "Youth Behavior Checklist - Wave 2")
+
+#Section TC: 
+
+save_plot(testxpov, file ="testxpov.png")
+povlabs
+
+```
+
+```{r}
+
+
+outcome <- cps %>%
+	pivot_longer(
+		cols = c(10:12,15,26),
+		names_to = "health_stat",
+		values_to = "health_score"
+	) %>% pivot_longer(
+	cols = 7:8,
+	names_to = "test",
+	values_to = "score") %>% filter(!is.na(score)) %>% 
+	mutate(health_yn = case_when(health_score == 1 ~ "yes",
+									 health_score == 2 ~ as.character(NA),
+									 health_score == 3 ~ as.character(NA)
+	)) %>% filter(!is.na(health_yn))%>% 
+	ggplot(aes(score,health_stat))+
+	geom_jitter(aes(color=Gender), alpha = .7) +
+	geom_boxplot(aes(fill = test)) +
+	scale_color_manual(labels = c("Male", "Female"), values = c("darkorchid", "darkseagreen2"))+
+	scale_fill_okabe_ito(alpha = .5) +
+	labs(x = "",
+			 y = "",
+			 title = "Chronic health outcome and test score by biological sex",
+			 color = "Biological sex",
+			 fill = "") +
+	facet_wrap(~test)
+
+save_plot(outcome, file = "outcome.png")
+outcome
+```
+
+```{r cor}
+rcorr(as.matrix(cps, na.rm=T)) 
+
+corr <- plot_corr(
+  cps,
+  vrb = c("Externalizing", "Internalizing", "adhd", "weight", "anxdep", "asthma", "asd", "Poverty", "Gender"),
+  label = TRUE,
+  square = FALSE,
+  diagonal = TRUE,
+  rotate = TRUE
+)
+
+save_plot(corr, file="corr.jpg")
+corr
+plot_pattern(cps,square = TRUE, rotate = TRUE)
+```
+
+```{r}
+demo2 <- cps %>% 
+	mutate(Ethnicity = case_when(Ethnicity == 1 ~ "Native Indian/Alaskan",
+									 Ethnicity == 2 ~ "Black",
+									 Ethnicity == 3 ~ "White",
+									 Ethnicity == 4 ~ "other"
+	), 
+	Poverty= case_when(Poverty == 0 ~ "Below Poverty",
+											 Poverty == 1 ~ "Above Poverty")) %>% 
+  group_by(Ethnicity) %>% 
+  plot_frq(Poverty) %>%
+    plot_grid()
+
+save_plot( demo2, file="demo2.png")
+
+demo2
+cps %>% 
+  plot_frq(asthma, adhd, weight, asd, anxdep) %>%
+    plot_grid()
+```
+```{r plot non-imputed data}
+fit1 <- lm(asthma ~ Poverty + Internalizing  + Externalizing + Ethnicity+ Gender, data = cps)
+fit2 <- lm(adhd ~ Poverty + Internalizing  + Externalizing + Ethnicity+ Gender, data = cps)
+fit3 <- lm(asd ~ Poverty + Internalizing  + Externalizing + Ethnicity+ Gender, data = cps)
+fit4 <- lm(weight ~ Poverty + Internalizing  + Externalizing + Ethnicity+ Gender, data = cps)
+fit5 <- lm(anxdep ~ Poverty + Internalizing  + Externalizing + Ethnicity+ Gender, data = cps)
+
+# plot multiple models
+plot_models(fit1, fit2, fit3, fit4, fit5, show.values = T, grid = TRUE)
+
+tab_model(fit1, fit2, fit3, fit4, fit5, 
+          collapse.ci = TRUE, 
+          p.style     = "numeric_stars")
+```
+
