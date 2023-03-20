@@ -216,7 +216,7 @@ imputation (MI) was employed in the current study to address missing data. Twent
   <p> To assess the hypothesis 2, we ran 5 logistic regression models to examine the association between internalzing and externalzing scores and each child health outcome (ADHD, ASD, asthma, weight, and anxiety/depression symptoms). The independent variables for each model were externalizing and internalizing scores, and covariates(child biological sex and child ethnicity). </p>
 <p>Finally, we examined and compared model performances using a ridge penalty regularization (glmnet) and bagged trees (ranger) approach with cross validation. The bagged trees approach randomly selects from the pooled imputed datasets and makes aggregate predictions for 500 different trees. Ridge penalty regularization adds penalty terms to the loss function to avoid large coefficients, and we reduce model variance by including a penalty term in exchange for adding bias. The cutoff probability for predictions is: probability > 0.5. </p>
 <p>The logistic model performances were assessed based on measures of: true negative rate, true positive rate, accuracy, and precision. The multiple regression model performances were assesed based on measures of: Root of the Mean of the Square of Errors (RMSE), Mean of Absolute value of Errors (MAE), and R-squared. Model performance comparisons are outlined in (tables <a href="#tbl:Logistic">4</a>, <a href="#tbl:logisticridge">5</a>,<a href="#tbl:Bagged">6</a>).</p>
-  <p> All markdown code scripts used can be found here.</p>
+  <p> All markdown code scripts used can be found <a href="https://github.com/rebeccagordon/edld640/tree/main/scripts">here</a>. Data can be found <a href="https://github.com/rebeccagordon/edld640/tree/main/data">here</a>. </p>
 <h2 id="results">Results</h2>
   <p><b>Hypothesis 1. </b>We found that poverty was significantly associated with negative internalizing (β = -1.12, SE=.4, p=0.01) but associated with positive externalizing (β = 2.6, SE=.6, p=0.01) scores at wave 2 (table <a href="#fig:hyp1">2</a>).</p>
   <p><b>Hypothesis 2. </b>We found that internalizing and externalizing scores were significantly associated with chronic health conditions at wave 3 (table <a href="#fig:hyp2">3</a>). Lower externalzing scores predicted ADHD (β = -.02, SE = 0, p=.04) and lower internalizing scores predicted anxiety/depression (β = -.01, SE = 0, p=.04). </p>
@@ -228,7 +228,7 @@ imputation (MI) was employed in the current study to address missing data. Twent
 <h2 id="figures">Figures</h2>
 <div id="fig:health" class="fignos">
 <figure>
-<img src="https://user-images.githubusercontent.com/26876607/223851563-67ac0de8-ccf8-493f-b144-89ae09072967.png"style="width:100%" alt="Figure 1: Health outcome by biological sex" />
+<img src="https://user-images.githubusercontent.com/26876607/223851563-67ac0de8-ccf8-493f-b144-89ae09072967.png"style="width:75%" alt="Figure 1: Health outcome by biological sex" />
 <figcaption aria-hidden="true"><span>Figure 1:</span> <strong></strong>
 Chronic health outcome and test score by biological sex</figcaption>
 </figure>
@@ -286,7 +286,7 @@ Correlation Matrix</figcaption>
 </tr>
 <tbody>
 <tr class="even">
-<td style="text-align: center;">Chronic Conditions</td>
+<td style="text-align: center;"><b>Chronic Conditions</b></td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"></td>
 </tr>
@@ -294,31 +294,31 @@ Correlation Matrix</figcaption>
 <tr class="odd">
 <td style="text-align: center;">Asthma</td>
 <td style="text-align: center;">480</td>
-<td style="text-align: center;">Yes: 18</td>
+<td style="text-align: center;">18</td>
 </tr>
 <tbody>
 <tr class="even">
 <td style="text-align: center;">ADHD</td>
 <td style="text-align: center;">464</td>
-<td style="text-align: center;">Yes: 12</td>
+<td style="text-align: center;">12</td>
 </tr>
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">Autism</td>
 <td style="text-align: center;">481</td>
-<td style="text-align: center;">Yes: 5</td>
+<td style="text-align: center;">5</td>
 </tr>
 <tbody>
 <tr class="even">
 <td style="text-align: center;">Anxiety/Depression</td>
 <td style="text-align: center;">481</td>
-<td style="text-align: center;">Yes: 10</td>
+<td style="text-align: center;">10</td>
 </tr>
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">Overweight</td>
 <td style="text-align: center;">483</td>
-<td style="text-align: center;">Yes: 4</td>
+<td style="text-align: center;">4</td>
 </tr>
 <thead>
 <tr class="header">
